@@ -1,5 +1,7 @@
 local M = {}
 
+local notified_prs = {}
+
 local function check_for_new_prs(user)
   local command = string.format("gh search prs --assignee %s --json number,title,url", user)
   local handle = io.popen(command)
@@ -11,8 +13,11 @@ local function check_for_new_prs(user)
   if #data > 0 then
     local message = string.format("New PRs assigned to %s:", user)
     for _, pr in ipairs(data) do
-      message = string.format("%d. %s (%s)", pr.number, pr.title, pr.url)
-      vim.notify(message)
+      if not notified_prs[pr.number] then
+        notified_prs[pr.number] = { title = pr.title, url = pr.url }
+        message = string.format("%d. %s (%s)", pr.number, pr.title, pr.url)
+        vim.notify(message)
+      end
     end
   end
 end
