@@ -1,36 +1,30 @@
+local Job = require "plenary.job"
+
 local M = {}
 
-function M.get_gh_username()
-  local handle = io.popen("gh api user")
-  if not handle then
-    vim.notify("Error running gh command", vim.log.levels.ERROR)
-    return {}
-  end
-
-  local result = handle:read("*a")
-  handle:close()
-  local data = vim.json.decode(result)
-
-  if not data then
-    vim.notify("Failed to get GitHub username", vim.log.levels.ERROR)
-    return
-  end
-
-  return data.login
+function M.async_username(callback)
+  Job:new {
+    command = "gh",
+    args = { "api", "user" },
+    on_exit = function(job, code, signal)
+      local result = job:result()[1]
+      local data = vim.json.decode(result)
+      callback(data.login)
+    end
+  }:start()
 end
 
-function M.get_prs(user)
-  local command = string.format("gh search prs --assignee %s --json number,title,url", user)
-  local handle = io.popen(command)
-  if not handle then
-    vim.notify("Error running gh command", vim.log.levels.ERROR)
-    return {}
-  end
-
-  local result = handle:read("*a")
-  handle:close()
-
-  return vim.json.decode(result)
+function M.async_prs(username, callback)
+  Job:new {
+    command = "gh",
+    -- args = { "search", "prs", "repo", "Datascience", "--json", "number,title,url" },
+    args = { "search", "prs", "--assignee", username, "--json", "number,title,url" },
+    on_exit = function(job, code, signal)
+      local result = job:result()[1]
+      local data = vim.json.decode(result)
+      callback(data)
+    end
+  }:start()
 end
 
 return M

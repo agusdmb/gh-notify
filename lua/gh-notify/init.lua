@@ -29,31 +29,42 @@ local add_new_prs = function(new_prs)
   end
 end
 
-
-local function check_for_new_prs(user)
-  local prs = gh.get_prs(user)
+local function _check_for_new_prs(prs)
   local new_prs = compare_prs(prs, notified_prs)
 
   notify_new_prs(new_prs)
   add_new_prs(new_prs)
 end
 
+function M.check_for_new_prs()
+  if not M.username then
+    M.set_username()
+    return
+  end
+  gh.async_prs(M.username, _check_for_new_prs)
+end
+
 function M.open_telescope()
   telescope.open_telescope(notified_prs)
 end
 
+function M.set_username()
+  gh.async_username(function(username)
+    M.username = username
+  end)
+end
+
 function M.setup(opts)
-  local user = gh.get_gh_username()
+  M.set_username()
 
   local interval = opts.interval or 60
-  local start_after = opts.start_after or 10
 
   local timer = vim.loop.new_timer()
   if not timer then
     vim.notify("Failed to create timer", vim.log.levels.ERROR)
     return
   end
-  timer:start(start_after * 1000, interval * 1000, vim.schedule_wrap(function() check_for_new_prs(user) end))
+  timer:start(0, interval * 1000, vim.schedule_wrap(function() M.check_for_new_prs() end))
 
   vim.cmd([[command! -nargs=0 GhPRs lua require("gh-notify").open_telescope()]])
 end
