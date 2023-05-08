@@ -38,20 +38,40 @@ end
 
 function M.check_for_new_prs()
   if not M.username then
-    M.set_username()
+    M.set_username(M.check_for_new_prs)
     return
   end
-  gh.async_prs(M.username, _check_for_new_prs)
+  if not M.repo then
+    M.set_repo(M.check_for_new_prs)
+    return
+  end
+  gh.async_prs(M.username, M.repo, _check_for_new_prs)
 end
 
 function M.open_telescope()
   telescope.open_telescope(notified_prs)
 end
 
-function M.set_username()
+function M.set_username(callback)
   gh.async_username(function(username)
     M.username = username
+    if callback then
+      callback()
+    end
   end)
+end
+
+function M.set_repo(callback)
+  gh.async_repo_name(function(repo)
+    M.repo = repo
+    if callback then
+      callback()
+    end
+  end)
+end
+
+function M.get_repo()
+  return M.repo
 end
 
 function M.setup(opts)

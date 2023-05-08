@@ -14,15 +14,30 @@ function M.async_username(callback)
   }:start()
 end
 
-function M.async_prs(username, callback)
+function M.async_prs(username, repo, callback)
   Job:new {
     command = "gh",
-    -- args = { "search", "prs", "repo", "Datascience", "--json", "number,title,url" },
-    args = { "search", "prs", "--assignee", username, "--json", "number,title,url" },
+    args = { "search", "prs",
+      "repo", repo,
+      "--review-requested", username,
+      "--json", "number,title,url",
+      "--state", "open" },
     on_exit = function(job, code, signal)
       local result = job:result()[1]
       local data = vim.json.decode(result)
       callback(data)
+    end
+  }:start()
+end
+
+function M.async_repo_name(callback)
+  Job:new {
+    command = "gh",
+    args = { "repo", "view", "--json", "name" },
+    on_exit = function(job, code, signal)
+      local result = job:result()[1]
+      local data = vim.json.decode(result)
+      callback(data.name)
     end
   }:start()
 end
