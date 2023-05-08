@@ -87,7 +87,7 @@ local function initialize_loop()
 end
 
 function M.setup(opts)
-  M.interval = opts.interval or 60
+  M.interval = opts and opts.interval or 60
   M.set_username()
   M.set_repo(initialize_loop)
   vim.cmd([[command! -nargs=0 GhPRs lua require("gh-review").open_telescope()]])
