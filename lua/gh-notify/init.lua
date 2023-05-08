@@ -19,7 +19,7 @@ end
 
 local function notify_new_prs(new_prs)
   for _, pr in pairs(new_prs) do
-    vim.notify(string.format("New PR: %s (%s)", pr.title, pr.url))
+    vim.notify(string.format("New PR: %s", pr.title))
   end
 end
 
@@ -63,6 +63,9 @@ end
 
 function M.set_repo(callback)
   gh.async_repo_name(function(repo)
+    if not repo then
+      return
+    end
     M.repo = repo
     if callback then
       callback()
@@ -74,18 +77,19 @@ function M.get_repo()
   return M.repo
 end
 
-function M.setup(opts)
-  M.set_username()
-
-  local interval = opts.interval or 60
-
+local function initialize_loop()
   local timer = vim.loop.new_timer()
   if not timer then
     vim.notify("Failed to create timer", vim.log.levels.ERROR)
     return
   end
-  timer:start(0, interval * 1000, vim.schedule_wrap(function() M.check_for_new_prs() end))
+  timer:start(0, M.interval * 1000, vim.schedule_wrap(function() M.check_for_new_prs() end))
+end
 
+function M.setup(opts)
+  M.interval = opts.interval or 60
+  M.set_username()
+  M.set_repo(initialize_loop)
   vim.cmd([[command! -nargs=0 GhPRs lua require("gh-notify").open_telescope()]])
 end
 
