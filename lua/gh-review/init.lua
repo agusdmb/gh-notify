@@ -1,5 +1,5 @@
-local gh = require("gh-notify.gh")
-local telescope = require("gh-notify.telescope")
+local gh = require("gh-review.gh")
+local telescope = require("gh-review.telescope")
 
 local M = {}
 
@@ -90,7 +90,7 @@ function M.setup(opts)
   M.interval = opts.interval or 60
   M.set_username()
   M.set_repo(initialize_loop)
-  vim.cmd([[command! -nargs=0 GhPRs lua require("gh-notify").open_telescope()]])
+  vim.cmd([[command! -nargs=0 GhPRs lua require("gh-review").open_telescope()]])
 end
 
 return M
