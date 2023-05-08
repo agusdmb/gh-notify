@@ -21,7 +21,7 @@ function M.async_prs(username, repo, callback)
       "search", "prs",
       "--repo", repo,
       "--review-requested", username,
-      "--json", "number,title,url",
+      "--json", "number,title,url,body",
       "--state", "open",
     },
     on_exit = function(job, code, signal)

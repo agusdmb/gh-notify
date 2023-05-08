@@ -10,7 +10,7 @@ local function compare_prs(prs, other_prs)
   if #prs > 0 then
     for _, pr in ipairs(prs) do
       if not other_prs[pr.number] then
-        new_prs[pr.number] = { title = pr.title, url = pr.url }
+        new_prs[pr.number] = { title = pr.title, url = pr.url, body = pr.body }
       end
     end
   end
@@ -25,7 +25,7 @@ end
 
 local add_new_prs = function(new_prs)
   for pr_number, pr in pairs(new_prs) do
-    notified_prs[pr_number] = { title = pr.title, url = pr.url }
+    notified_prs[pr_number] = { title = pr.title, url = pr.url, body = pr.body }
   end
 end
 
