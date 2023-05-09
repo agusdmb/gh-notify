@@ -10,7 +10,7 @@ local function compare_prs(prs, other_prs)
   if #prs > 0 then
     for _, pr in ipairs(prs) do
       if not other_prs[pr.number] then
-        new_prs[pr.number] = { title = pr.title, url = pr.url, body = pr.body }
+        new_prs[pr.number] = pr
       end
     end
   end
@@ -25,7 +25,7 @@ end
 
 local add_new_prs = function(new_prs)
   for pr_number, pr in pairs(new_prs) do
-    notified_prs[pr_number] = { title = pr.title, url = pr.url, body = pr.body }
+    notified_prs[pr_number] = pr
   end
 end
 
@@ -41,11 +41,7 @@ function M.check_for_new_prs()
     M.set_username(M.check_for_new_prs)
     return
   end
-  if not M.repo then
-    M.set_repo(M.check_for_new_prs)
-    return
-  end
-  gh.async_prs(M.username, M.repo, _check_for_new_prs)
+  gh.async_prs(M.username, _check_for_new_prs)
 end
 
 function M.open_telescope()
@@ -61,20 +57,14 @@ function M.set_username(callback)
   end)
 end
 
-function M.set_repo(callback)
-  gh.async_repo_name(function(repo)
-    if not repo then
-      return
-    end
-    M.repo = repo
-    if callback then
-      callback()
-    end
-  end)
-end
-
-function M.get_repo()
-  return M.repo
+local function check_inside_git_repo()
+  local handle = io.popen("git rev-parse --is-inside-work-tree 2> /dev/null", "r")
+  if not handle then
+    return false
+  end
+  local result = handle:read("*a")
+  handle:close()
+  return result:match("true")
 end
 
 local function initialize_loop()
@@ -87,9 +77,12 @@ local function initialize_loop()
 end
 
 function M.setup(opts)
+  if not check_inside_git_repo() then
+    return
+  end
   M.interval = opts and opts.interval or 60
   M.set_username()
-  M.set_repo(initialize_loop)
+  initialize_loop()
   vim.cmd([[command! -nargs=0 GhPRs lua require("gh-review").open_telescope()]])
 end
 
