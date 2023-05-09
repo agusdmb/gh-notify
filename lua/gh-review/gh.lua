@@ -20,7 +20,7 @@ function M.async_prs(username, callback)
     args = {
       "pr", "list",
       "--search", "review-requested:" .. username,
-      "--json", "number,title,url,body,baseRefName,headRefName",
+      "--json", "number,title,url,body,baseRefName,headRefName,files",
       "--state", "open",
     },
     on_exit = function(job, code, signal)

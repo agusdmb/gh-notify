@@ -48,7 +48,12 @@ function M.open_telescope(prs)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        io.popen("open " .. selection["value"].url)
+        local handle = io.popen("gh pr checkout " .. selection["value"].headRefName .. " 2> /dev/null")
+        handle:read("*a")
+        vim.cmd("checktime")
+        for _, files in ipairs(selection["value"].files) do
+          vim.cmd("e " .. files.path)
+        end
       end)
       return true
     end,
