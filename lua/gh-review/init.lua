@@ -45,7 +45,11 @@ function M.check_for_new_prs()
 end
 
 function M.open_telescope()
-  telescope.open_telescope(notified_prs)
+  local prs = {}
+  for _, pr_data in pairs(notified_prs) do
+    table.insert(prs, pr_data)
+  end
+  telescope.open_telescope(prs)
 end
 
 function M.set_username(callback)

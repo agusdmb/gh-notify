@@ -7,12 +7,7 @@ local action_state = require "telescope.actions.state"
 
 local M = {}
 
-function M.open_telescope(notified_prs)
-  local prs = {}
-  for _, pr_data in pairs(notified_prs) do
-    table.insert(prs, { pr_data.url, pr_data.title, pr_data.body })
-  end
-
+function M.open_telescope(prs)
   local opts = {
     previewer = true,
     layout_config = {
@@ -40,10 +35,10 @@ function M.open_telescope(notified_prs)
       results = prs,
       entry_maker = function(entry)
         return {
-          value = entry[1],
-          display = entry[2],
-          ordinal = entry[2],
-          preview = entry[3],
+          value = entry,
+          display = entry.title,
+          ordinal = entry.title,
+          preview = entry.body,
         }
       end,
     },
@@ -53,7 +48,7 @@ function M.open_telescope(notified_prs)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        io.popen("open " .. selection["value"])
+        io.popen("open " .. selection["value"].url)
       end)
       return true
     end,
