@@ -75,3 +75,10 @@ gh-review provides the following commands:
 We hope that you find gh-review helpful in streamlining your PR review process.
 Please don't hesitate to open an issue or submit a pull request if you
 encounter any problems or have suggestions for new features.
+
+---
+
+# draft
+
+it will only fetch prs from the current repo
+it will change your branch when doing a diff

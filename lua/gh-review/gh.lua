@@ -25,6 +25,9 @@ function M.async_prs(username, callback)
     },
     on_exit = function(job, code, signal)
       local result = job:result()[1]
+      if not result then
+        return
+      end
       local data = vim.json.decode(result)
       callback(data)
     end
